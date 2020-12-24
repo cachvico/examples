@@ -27,6 +27,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -118,12 +119,14 @@ public class TFLiteObjectDetectionAPIModel implements Detector {
       throws IOException {
     final TFLiteObjectDetectionAPIModel d = new TFLiteObjectDetectionAPIModel();
 
-    MappedByteBuffer modelFile = loadModelFile(context.getAssets(), modelFilename);
+    AssetManager assetManager = context.getAssets();
+    MappedByteBuffer modelFile = loadModelFile(assetManager, modelFilename);
     MetadataExtractor metadata = new MetadataExtractor(modelFile);
-    try (BufferedReader br =
+    try (InputStream labelsInput = assetManager.open(labelFilename);
+         BufferedReader br =
         new BufferedReader(
-            new InputStreamReader(
-                metadata.getAssociatedFile(labelFilename), Charset.defaultCharset()))) {
+            new InputStreamReader(labelsInput))) {
+
       String line;
       while ((line = br.readLine()) != null) {
         Log.w(TAG, line);
